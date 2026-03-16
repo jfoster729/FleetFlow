@@ -54,6 +54,22 @@ public class Load {
         return assignedTruckId;
     }
 
+    public void setPickupLocation(String pickupLocation) {
+        this.pickupLocation = pickupLocation;
+    }
+
+    public void setDeliveryLocation(String deliveryLocation) {
+        this.deliveryLocation = deliveryLocation;
+    }
+
+    public void setRate(double rate) {
+        this.rate = rate;
+    }
+
+    public void setWeight(double weight) {
+        this.weight = weight;
+    }
+
     public void setStatus(LoadStatus status) {
         this.status = status;
     }

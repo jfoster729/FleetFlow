@@ -42,6 +42,18 @@ public class Driver {
         return assignedTruckId;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public void setLicenseNumber(String licenseNumber) {
+        this.licenseNumber = licenseNumber;
+    }
+
     public void setAvailable(boolean available) {
         this.available = available;
     }

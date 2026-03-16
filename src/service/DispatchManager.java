@@ -92,13 +92,16 @@ public class DispatchManager {
             return false;
         }
 
+        if (load.getAssignedDriverId() != null || load.getAssignedTruckId() != null) {
+            return false;
+        }
+
         load.setAssignedDriverId(driverId);
         load.setAssignedTruckId(truckId);
         load.setStatus(LoadStatus.ASSIGNED);
 
         driver.setAvailable(false);
         driver.setAssignedTruckId(truckId);
-
         truck.setAvailable(false);
 
         return true;
@@ -111,15 +114,10 @@ public class DispatchManager {
             return false;
         }
 
-        LoadStatus oldStatus = load.getStatus();
         load.setStatus(newStatus);
 
         if (newStatus == LoadStatus.DELIVERED || newStatus == LoadStatus.CANCELLED) {
             releaseDriverAndTruck(load);
-        }
-
-        if (oldStatus == LoadStatus.DELIVERED || oldStatus == LoadStatus.CANCELLED) {
-            // no action needed for now
         }
 
         return true;
@@ -143,6 +141,96 @@ public class DispatchManager {
                 truck.setAvailable(true);
             }
         }
+    }
+
+    public boolean editDriver(int driverId, String newName, String newPhone, String newLicense) {
+        Driver driver = findDriverById(driverId);
+
+        if (driver == null) {
+            return false;
+        }
+
+        driver.setName(newName);
+        driver.setPhone(newPhone);
+        driver.setLicenseNumber(newLicense);
+        return true;
+    }
+
+    public boolean editTruck(int truckId, String newPlate, String newModel, double newMaxLoadWeight) {
+        Truck truck = findTruckById(truckId);
+
+        if (truck == null) {
+            return false;
+        }
+
+        truck.setPlateNumber(newPlate);
+        truck.setModel(newModel);
+        truck.setMaxLoadWeight(newMaxLoadWeight);
+        return true;
+    }
+
+    public boolean editLoad(int loadId, String newPickup, String newDelivery, double newRate, double newWeight) {
+        Load load = findLoadById(loadId);
+
+        if (load == null) {
+            return false;
+        }
+
+        if (load.getStatus() == LoadStatus.IN_TRANSIT || load.getStatus() == LoadStatus.DELIVERED) {
+            return false;
+        }
+
+        load.setPickupLocation(newPickup);
+        load.setDeliveryLocation(newDelivery);
+        load.setRate(newRate);
+        load.setWeight(newWeight);
+        return true;
+    }
+
+    public boolean deleteDriver(int driverId) {
+        Driver driver = findDriverById(driverId);
+
+        if (driver == null) {
+            return false;
+        }
+
+        if (!driver.isAvailable()) {
+            return false;
+        }
+
+        return drivers.remove(driver);
+    }
+
+    public boolean deleteTruck(int truckId) {
+        Truck truck = findTruckById(truckId);
+
+        if (truck == null) {
+            return false;
+        }
+
+        if (!truck.isAvailable()) {
+            return false;
+        }
+
+        return trucks.remove(truck);
+    }
+
+    public boolean deleteLoad(int loadId) {
+        Load load = findLoadById(loadId);
+
+        if (load == null) {
+            return false;
+        }
+
+        if (load.getStatus() == LoadStatus.IN_TRANSIT) {
+            return false;
+        }
+
+        if (load.getAssignedDriverId() != null || load.getAssignedTruckId() != null) {
+            releaseDriverAndTruck(load);
+        }
+
+        return loads.remove(load);
     }
 
     public List<Load> getActiveLoads() {
@@ -195,5 +283,50 @@ public class DispatchManager {
         }
 
         return total;
+    }
+
+    public void setDrivers(List<Driver> drivers) {
+        this.drivers = drivers;
+        updateNextDriverId();
+    }
+
+    public void setTrucks(List<Truck> trucks) {
+        this.trucks = trucks;
+        updateNextTruckId();
+    }
+
+    public void setLoads(List<Load> loads) {
+        this.loads = loads;
+        updateNextLoadId();
+    }
+
+    private void updateNextDriverId() {
+        int maxId = 0;
+        for (Driver driver : drivers) {
+            if (driver.getDriverId() > maxId) {
+                maxId = driver.getDriverId();
+            }
+        }
+        nextDriverId = maxId + 1;
+    }
+
+    private void updateNextTruckId() {
+        int maxId = 0;
+        for (Truck truck : trucks) {
+            if (truck.getTruckId() > maxId) {
+                maxId = truck.getTruckId();
+            }
+        }
+        nextTruckId = maxId + 1;
+    }
+
+    private void updateNextLoadId() {
+        int maxId = 0;
+        for (Load load : loads) {
+            if (load.getLoadId() > maxId) {
+                maxId = load.getLoadId();
+            }
+        }
+        nextLoadId = maxId + 1;
     }
 }

@@ -1,6 +1,6 @@
-import model.Load;
 import model.LoadStatus;
 import service.DispatchManager;
+import service.FileService;
 import service.ReportService;
 import util.InputHelper;
 
@@ -13,6 +13,11 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         DispatchManager manager = new DispatchManager();
         ReportService reports = new ReportService();
+        FileService fileService = new FileService();
+
+        manager.setDrivers(fileService.loadDrivers("drivers.csv"));
+        manager.setTrucks(fileService.loadTrucks("trucks.csv"));
+        manager.setLoads(fileService.loadLoads("loads.csv"));
 
         boolean running = true;
 
@@ -29,6 +34,13 @@ public class Main {
             System.out.println("9. View Active Loads");
             System.out.println("10. View Completed Loads");
             System.out.println("11. View Revenue Summary");
+            System.out.println("12. Save Data");
+            System.out.println("13. Edit Driver");
+            System.out.println("14. Edit Truck");
+            System.out.println("15. Edit Load");
+            System.out.println("16. Delete Driver");
+            System.out.println("17. Delete Truck");
+            System.out.println("18. Delete Load");
             System.out.println("0. Exit");
 
             int choice = InputHelper.readInt(scanner, "Select option: ");
@@ -67,7 +79,7 @@ public class Main {
                     if (manager.assignLoad(loadId, driverId, truckId)) {
                         System.out.println("Load assigned successfully.");
                     } else {
-                        System.out.println("Assignment failed. Check IDs, availability, or truck weight capacity.");
+                        System.out.println("Assignment failed. Check IDs, availability, current assignment, or truck weight capacity.");
                     }
                     break;
 
@@ -120,9 +132,89 @@ public class Main {
                     );
                     break;
 
+                case 12:
+                    fileService.saveDrivers(manager.getDrivers(), "drivers.csv");
+                    fileService.saveTrucks(manager.getTrucks(), "trucks.csv");
+                    fileService.saveLoads(manager.getLoads(), "loads.csv");
+                    System.out.println("Data saved successfully.");
+                    break;
+
+                case 13:
+                    int editDriverId = InputHelper.readInt(scanner, "Driver ID to edit: ");
+                    String newDriverName = InputHelper.readLine(scanner, "New Driver Name: ");
+                    String newDriverPhone = InputHelper.readLine(scanner, "New Phone: ");
+                    String newDriverLicense = InputHelper.readLine(scanner, "New License: ");
+
+                    if (manager.editDriver(editDriverId, newDriverName, newDriverPhone, newDriverLicense)) {
+                        System.out.println("Driver updated successfully.");
+                    } else {
+                        System.out.println("Driver not found.");
+                    }
+                    break;
+
+                case 14:
+                    int editTruckId = InputHelper.readInt(scanner, "Truck ID to edit: ");
+                    String newPlate = InputHelper.readLine(scanner, "New Plate Number: ");
+                    String newTruckModel = InputHelper.readLine(scanner, "New Truck Model: ");
+                    double newTruckWeight = InputHelper.readDouble(scanner, "New Max Load Weight: ");
+
+                    if (manager.editTruck(editTruckId, newPlate, newTruckModel, newTruckWeight)) {
+                        System.out.println("Truck updated successfully.");
+                    } else {
+                        System.out.println("Truck not found.");
+                    }
+                    break;
+
+                case 15:
+                    int editLoadId = InputHelper.readInt(scanner, "Load ID to edit: ");
+                    String newPickup = InputHelper.readLine(scanner, "New Pickup Location: ");
+                    String newDelivery = InputHelper.readLine(scanner, "New Delivery Location: ");
+                    double newRate = InputHelper.readDouble(scanner, "New Load Rate: ");
+                    double newWeight = InputHelper.readDouble(scanner, "New Load Weight: ");
+
+                    if (manager.editLoad(editLoadId, newPickup, newDelivery, newRate, newWeight)) {
+                        System.out.println("Load updated successfully.");
+                    } else {
+                        System.out.println("Load not found or cannot be edited in its current status.");
+                    }
+                    break;
+
+                case 16:
+                    int deleteDriverId = InputHelper.readInt(scanner, "Driver ID to delete: ");
+
+                    if (manager.deleteDriver(deleteDriverId)) {
+                        System.out.println("Driver deleted successfully.");
+                    } else {
+                        System.out.println("Driver not found or currently assigned.");
+                    }
+                    break;
+
+                case 17:
+                    int deleteTruckId = InputHelper.readInt(scanner, "Truck ID to delete: ");
+
+                    if (manager.deleteTruck(deleteTruckId)) {
+                        System.out.println("Truck deleted successfully.");
+                    } else {
+                        System.out.println("Truck not found or currently assigned.");
+                    }
+                    break;
+
+                case 18:
+                    int deleteLoadId = InputHelper.readInt(scanner, "Load ID to delete: ");
+
+                    if (manager.deleteLoad(deleteLoadId)) {
+                        System.out.println("Load deleted successfully.");
+                    } else {
+                        System.out.println("Load not found or currently in transit.");
+                    }
+                    break;
+
                 case 0:
+                    fileService.saveDrivers(manager.getDrivers(), "drivers.csv");
+                    fileService.saveTrucks(manager.getTrucks(), "trucks.csv");
+                    fileService.saveLoads(manager.getLoads(), "loads.csv");
                     running = false;
-                    System.out.println("Exiting FleetFlow...");
+                    System.out.println("Data saved. Exiting FleetFlow...");
                     break;
 
                 default:

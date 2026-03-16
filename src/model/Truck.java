@@ -36,6 +36,18 @@ public class Truck {
         return available;
     }
 
+    public void setPlateNumber(String plateNumber) {
+        this.plateNumber = plateNumber;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    public void setMaxLoadWeight(double maxLoadWeight) {
+        this.maxLoadWeight = maxLoadWeight;
+    }
+
     public void setAvailable(boolean available) {
         this.available = available;
     }
